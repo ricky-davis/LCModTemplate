@@ -29,6 +29,7 @@
 
 ### ModTemplate Project
 !ModTemplate/
+!ModTemplate.sln
 ModTemplate/[Bb]in/
 ModTemplate/[Oo]bj/
 
