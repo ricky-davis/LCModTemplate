@@ -35,7 +35,7 @@ Set-Content -Path $csprojFile.FullName -Value $content
 $currentScriptPath = $MyInvocation.MyCommand.Definition
 
 # Get all files in the directory, excluding the current script
-$files = Get-ChildItem -Path $directoryPath -Recurse -File | Where-Object { $_.FullName -ne $currentScriptPath }
+$files = Get-ChildItem -Path $directoryPath -Recurse -File | Where-Object { $_.FullName -ne $currentScriptPath -and $_.FullName -notmatch "\\.git\\" }
 foreach ($file in $files) {
     # Replace "ModTemplate" in the content of each file
     $fileContent = Get-Content $file.FullName -Raw
