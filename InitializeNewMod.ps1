@@ -1,20 +1,41 @@
-# Ask for the new mod name
-$newModName = Read-Host "Please enter the new mod name"
+# Get the name of the current directory
+$currentDirectory = Split-Path -Path $PWD -Leaf
+
+# Suggest the current directory name as the default mod name and ask for user input
+$newModName = Read-Host "Please enter the new mod name (default: $currentDirectory)"
+if (-not $newModName) {
+    $newModName = $currentDirectory
+}
 
 # Define the directory where the files are located
-$directoryPath = Get-Location
+$directoryPath = $PWD
 
 # Update .csproj file
 $csprojFile = Get-ChildItem -Path $directoryPath -Filter "ModTemplate.csproj" -Recurse
 $content = Get-Content $csprojFile.FullName
-$content = $content -replace "ModTemplate", $newModName
+
+# Format the new mod name for the <Product> tag (PascalCase to spaced words)
+
+$formattedModName = ""
+$newModName.ToCharArray() | ForEach-Object {
+    if ($_ -cmatch "[A-Z]" -and $formattedModName.Length -gt 0) {
+        $formattedModName += " " + $_
+    } else {
+        $formattedModName += $_
+    }
+}
+
+# Replace "ModTemplate" and format "Mod Template" with the new mod name in the .csproj file
+$content = $content -replace "<Product>Mod Template</Product>", "<Product>$formattedModName</Product>"
+
+
 Set-Content -Path $csprojFile.FullName -Value $content
 
-# Get all files and directories in the directory
-$items = Get-ChildItem -Path $directoryPath -Recurse
+# Get the path of the currently running script
+$currentScriptPath = $MyInvocation.MyCommand.Definition
 
-# Get all files in the directory
-$files = Get-ChildItem -Path $directoryPath -Recurse -File
+# Get all files in the directory, excluding the current script
+$files = Get-ChildItem -Path $directoryPath -Recurse -File | Where-Object { $_.FullName -ne $currentScriptPath }
 foreach ($file in $files) {
     # Replace "ModTemplate" in the content of each file
     $fileContent = Get-Content $file.FullName -Raw
